@@ -116,8 +116,11 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
                     break;
             }
 
-            Log.d(TAG, "changed state to " + stateString
-                    + " playWhenReady: " + playWhenReady);
+            Log.d(TAG, "changed state to " + stateString + " playWhenReady: " + playWhenReady);
+
+            if (exoPlayerCallBack != null) {
+                exoPlayerCallBack.onPlayerStateChanged(playbackState);
+            }
         }
 
         @Override
@@ -144,8 +147,7 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
         public void onPlayerError(ExoPlaybackException error) {
             showRetry();
 
-            if (exoPlayerCallBack != null)
-                exoPlayerCallBack.onError();
+            if (exoPlayerCallBack != null) exoPlayerCallBack.onError();
         }
 
         @Override
@@ -162,7 +164,6 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
         public void onSeekProcessed() {
 
         }
-
     }
 
     public AndExoPlayerView(Context context) {
@@ -172,19 +173,13 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
 
     public AndExoPlayerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        typedArray = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.AndExoPlayerView,
-                0, 0);
+        typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AndExoPlayerView, 0, 0);
         initializeView(context);
     }
 
     public AndExoPlayerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        typedArray = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.AndExoPlayerView,
-                0, 0);
+        typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AndExoPlayerView, 0, 0);
         initializeView(context);
     }
 
@@ -217,7 +212,8 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
             }
 
             if (typedArray.hasValue(R.styleable.AndExoPlayerView_andexo_aspect_ratio)) {
-                int aspectRatio = typedArray.getInteger(R.styleable.AndExoPlayerView_andexo_aspect_ratio, EnumAspectRatio.ASPECT_16_9.getValue());
+                int aspectRatio = typedArray.getInteger(R.styleable.AndExoPlayerView_andexo_aspect_ratio,
+                        EnumAspectRatio.ASPECT_16_9.getValue());
                 setAspectRatio(EnumAspectRatio.get(aspectRatio));
             }
 
@@ -234,7 +230,8 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
             }
 
             if (typedArray.hasValue(R.styleable.AndExoPlayerView_andexo_loop)) {
-                EnumLoop enumLoop = EnumLoop.get(typedArray.getInteger(R.styleable.AndExoPlayerView_andexo_loop, EnumLoop.Finite.getValue()));
+                EnumLoop enumLoop = EnumLoop.get(typedArray.getInteger(R.styleable.AndExoPlayerView_andexo_loop,
+                        EnumLoop.Finite.getValue()));
                 setLoopMode(enumLoop);
             }
 
@@ -337,13 +334,9 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
                     sourceFactory.getDefaultRequestProperties().set(entry.getKey(), entry.getValue());
             }
 
-            return new ProgressiveMediaSource.Factory(sourceFactory)
-                    .createMediaSource(uri);
-
+            return new ProgressiveMediaSource.Factory(sourceFactory).createMediaSource(uri);
         } else if (!validUrl && uri.getLastPathSegment().contains(PublicValues.KEY_MP4)) {
-            return new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(context, PublicValues.KEY_USER_AGENT))
-                    .createMediaSource(uri);
-
+            return new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(context, PublicValues.KEY_USER_AGENT)).createMediaSource(uri);
         } else if (uri.getLastPathSegment().contains(PublicValues.KEY_HLS)) {
             DefaultHttpDataSourceFactory sourceFactory = new DefaultHttpDataSourceFactory(PublicValues.KEY_USER_AGENT);
             if (extraHeaders != null) {
@@ -351,9 +344,7 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
                     sourceFactory.getDefaultRequestProperties().set(entry.getKey(), entry.getValue());
             }
 
-            return new HlsMediaSource.Factory(sourceFactory)
-                    .createMediaSource(uri);
-
+            return new HlsMediaSource.Factory(sourceFactory).createMediaSource(uri);
         } else if (uri.getLastPathSegment().contains(PublicValues.KEY_MP3)) {
 
             DefaultHttpDataSourceFactory sourceFactory = new DefaultHttpDataSourceFactory(PublicValues.KEY_USER_AGENT);
@@ -362,15 +353,12 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
                     sourceFactory.getDefaultRequestProperties().set(entry.getKey(), entry.getValue());
             }
 
-            return new ProgressiveMediaSource.Factory(sourceFactory)
-                    .createMediaSource(uri);
-
+            return new ProgressiveMediaSource.Factory(sourceFactory).createMediaSource(uri);
         } else {
-            DefaultDashChunkSource.Factory dashChunkSourceFactory = new DefaultDashChunkSource.Factory(new DefaultHttpDataSourceFactory("ua", new DefaultBandwidthMeter()));
+            DefaultDashChunkSource.Factory dashChunkSourceFactory = new DefaultDashChunkSource.Factory(new DefaultHttpDataSourceFactory(
+                    "ua", new DefaultBandwidthMeter()));
             DefaultHttpDataSourceFactory manifestDataSourceFactory = new DefaultHttpDataSourceFactory(PublicValues.KEY_USER_AGENT);
-            return new DashMediaSource.Factory(dashChunkSourceFactory, manifestDataSourceFactory)
-                    .createMediaSource(uri);
-
+            return new DashMediaSource.Factory(dashChunkSourceFactory, manifestDataSourceFactory).createMediaSource(uri);
         }
     }
 
@@ -387,23 +375,19 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
 
     public void setPlayWhenReady(boolean playWhenReady) {
         this.currPlayWhenReady = playWhenReady;
-        if (simpleExoPlayer != null)
-            simpleExoPlayer.setPlayWhenReady(playWhenReady);
+        if (simpleExoPlayer != null) simpleExoPlayer.setPlayWhenReady(playWhenReady);
     }
 
     public void stopPlayer() {
-        if (simpleExoPlayer != null)
-            simpleExoPlayer.stop();
+        if (simpleExoPlayer != null) simpleExoPlayer.stop();
     }
 
     public void pausePlayer() {
-        if (simpleExoPlayer != null)
-            simpleExoPlayer.setPlayWhenReady(false);
+        if (simpleExoPlayer != null) simpleExoPlayer.setPlayWhenReady(false);
     }
 
     public void setShowController(boolean showController) {
-        if (playerView == null)
-            return;
+        if (playerView == null) return;
 
         if (showController) {
             playerView.showController();
@@ -435,10 +419,8 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
     }
 
     public void setShowFullScreen(boolean showFullScreen) {
-        if (showFullScreen)
-            frameLayoutFullScreenContainer.setVisibility(VISIBLE);
-        else
-            frameLayoutFullScreenContainer.setVisibility(GONE);
+        if (showFullScreen) frameLayoutFullScreenContainer.setVisibility(VISIBLE);
+        else frameLayoutFullScreenContainer.setVisibility(GONE);
     }
 
     public void setAspectRatio(EnumAspectRatio aspectRatio) {
@@ -460,7 +442,8 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
                 break;
 
             case ASPECT_MATCH:
-                playerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                playerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
                 break;
 
             case ASPECT_MP3:
@@ -520,21 +503,14 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
 
     @SuppressLint("InlinedApi")
     private void hideSystemUi() {
-        if (playerView == null)
-            return;
+        if (playerView == null) return;
 
-        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
     }
 
     @SuppressLint("InlinedApi")
     private void showSystemUi() {
-        if (playerView == null)
-            return;
+        if (playerView == null) return;
 
         playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
@@ -561,45 +537,36 @@ public class AndExoPlayerView extends LinearLayout implements View.OnClickListen
         imageViewExitFullScreen.setVisibility(VISIBLE);
         imageViewEnterFullScreen.setVisibility(GONE);
 
-        if (getActivity() != null)
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        if (getActivity() != null) getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     private void exitFullScreen() {
         imageViewExitFullScreen.setVisibility(GONE);
         imageViewEnterFullScreen.setVisibility(VISIBLE);
 
-        if (getActivity() != null)
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        if (getActivity() != null) getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     private void showProgress() {
         hideAll();
-        if (linearLayoutLoading != null)
-            linearLayoutLoading.setVisibility(VISIBLE);
+        if (linearLayoutLoading != null) linearLayoutLoading.setVisibility(VISIBLE);
     }
 
     private void hideProgress() {
-        if (linearLayoutLoading != null)
-            linearLayoutLoading.setVisibility(GONE);
+        if (linearLayoutLoading != null) linearLayoutLoading.setVisibility(GONE);
     }
 
     private void showRetry() {
         hideAll();
-        if (linearLayoutRetry != null)
-            linearLayoutRetry.setVisibility(VISIBLE);
+        if (linearLayoutRetry != null) linearLayoutRetry.setVisibility(VISIBLE);
     }
 
     private void hideRetry() {
-        if (linearLayoutRetry != null)
-            linearLayoutRetry.setVisibility(GONE);
+        if (linearLayoutRetry != null) linearLayoutRetry.setVisibility(GONE);
     }
 
     private void hideAll() {
-        if (linearLayoutRetry != null)
-            linearLayoutRetry.setVisibility(GONE);
-        if (linearLayoutLoading != null)
-            linearLayoutLoading.setVisibility(GONE);
+        if (linearLayoutRetry != null) linearLayoutRetry.setVisibility(GONE);
+        if (linearLayoutLoading != null) linearLayoutLoading.setVisibility(GONE);
     }
-
 }
